@@ -2,7 +2,8 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
- 
+
+//implement using LinkedHashMap
 public class LRUCache {
  
     // store keys of cache

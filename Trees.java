@@ -1,5 +1,8 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
 public class Trees {
     static int depth=0;
@@ -25,8 +28,8 @@ public class Trees {
 
         System.out.println("Is foldable: "+foldable(n5,n5));
 
-        diameterOfTree(t.root,0);
-        System.out.println("Diameter Of Tree: "+diameter);
+        
+        System.out.println("Diameter Of Tree: "+diameterOfTree(t.root,0));
 
         System.out.println(lca(19, 34,t.root).value);
         System.out.println(lca(23, 89,t.root).value);
@@ -36,6 +39,43 @@ public class Trees {
         System.out.println(distanceBetweenNodes(23, 89,t.root));
         System.out.println(distanceBetweenNodes(19, 14,t.root));
         System.out.println(distanceBetweenNodes(19, 46,t.root));
+
+        zigzagTraversal(t.root);
+    }
+
+    static void zigzagTraversal(Node root){
+        if (root==null)
+            return;
+        Queue<Node> q=new LinkedList<>();
+        q.add(root);
+        Boolean left=true;
+        Stack<Node> stack=new Stack<>();
+        while (true){
+            while (!q.isEmpty()){
+                Node pop=q.poll();
+                System.out.print(pop.value+" -> ");
+                if(left){
+                    if(pop.left!=null)
+                        stack.push(pop.left);
+                    if(pop.right!=null)
+                        stack.push(pop.right);
+                }else {
+                    if(pop.right!=null)
+                        stack.push(pop.right);
+                    if(pop.left!=null)
+                        stack.push(pop.left);
+                }
+            }
+            left=!left;
+            if(!stack.empty()){
+                while (!stack.empty()){
+                    q.add(stack.pop());
+                }
+            }else {
+                break;
+            }
+
+        }
     }
 
     static int distanceBetweenNodes(int n1,int n2,Node root){
@@ -69,9 +109,9 @@ public class Trees {
         return 0;
         int leftD=diameterOfTree(root.left, d);
         int rightD=diameterOfTree(root.right, d);
-        d=d+Math.max(leftD, rightD);
-        diameter=Math.max(diameter, d);
-        return Math.max(leftD, rightD);
+        d=1+Math.max(leftD, rightD);
+        // diameter=Math.max(diameter, d);
+        return d;
     } 
     static Boolean foldable(Node n1,Node n2){
         if (n1==null && n2 ==null)
