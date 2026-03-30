@@ -1,0 +1,63 @@
+package multithreading;
+
+public class PrintOddEven {
+    public static void main(String[] args) throws InterruptedException {
+        OddEvenHelper helper=new OddEvenHelper();
+        Thread oddThread=new Thread(()->{
+            try {
+                helper.printOdd();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Thread evenThread=new Thread(()->{
+            try {
+                helper.printEven();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        oddThread.start();
+        evenThread.start();
+
+        oddThread.join();
+        evenThread.join();
+
+    }
+
+}
+class OddEvenHelper{
+    int counter=1;
+    public void printOdd() throws InterruptedException {
+        while (true){
+            synchronized (this){
+                if (counter % 2 == 1) {
+                    System.out.println(counter);
+                    counter++;
+                    notify();
+                } else {
+                    wait();
+                    notify();
+                }
+            }
+            Thread.sleep(500);
+        }
+    }
+
+    public void printEven() throws InterruptedException {
+        while (true){
+            synchronized (this){
+                if (counter % 2 == 0) {
+                    System.out.println(counter);
+                    counter++;
+                    notify();
+                } else {
+                    wait();
+                    notify();
+                }
+            }
+            Thread.sleep(500);
+        }
+    }
+}
