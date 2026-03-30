@@ -1,0 +1,333 @@
+package Graph;
+
+import java.util.*;
+import java.util.LinkedList;
+
+//Topics: dfs, bfs, rotten-oranges, islands
+public class GraphsDfsBfs {
+    public static void dfs(int[][] adj){
+        Stack<Integer> stack=new Stack<>();
+        boolean[] vis=new boolean[adj.length];
+        Arrays.fill(vis,false);
+        stack.push(4);
+        while (!stack.empty()){
+            int el= stack.pop();
+            if (!vis[el]){
+                vis[el]=true;
+                System.out.print(el+" ");
+                for (int item : adj[el]){
+                    if (!vis[item])
+                        stack.push(item);
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    public static void bfs(int[][] adj){
+        Queue<Integer> queue=new LinkedList<>();
+        boolean[] vis=new boolean[adj.length];
+        Arrays.fill(vis,false);
+        queue.add(0);
+        while (!queue.isEmpty()){
+            int item= queue.poll();
+            if (!vis[item]){
+                vis[item]=true;
+                System.out.print(item+" ");
+                for (int i=0;i<adj[item].length;i++){
+                    if (!vis[adj[item][i]])
+                        queue.add(adj[item][i]);
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    public static int snakeAndLadder(int[] moves){
+        boolean vis[]=new boolean[moves.length];
+        Queue<Cell> queue=new LinkedList<>();
+        queue.add(new Cell(0,0));
+        vis[0]=true;
+
+        while (!queue.isEmpty()){
+            Cell cell=queue.poll();
+            int index=cell.index;
+            if(index==moves.length-1){
+                return cell.distance;
+            }
+            for (int j = index + 1; j <= index + 6 && j < moves.length; j++) {
+                if (!vis[j]){
+                    vis[j]=true;
+                    int dest= (moves[j]==-1)?j:moves[j];
+                    queue.add(new Cell(dest,cell.distance+1));
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static int waterJugProblem(int m,int n,int d){
+        boolean vis[][]=new  boolean[m+1][n+1];
+        Queue<WaterJugFill> queue=new LinkedList<>();
+        queue.add(new WaterJugFill(0,0,0));
+        vis[0][0]=true;
+        while (!queue.isEmpty()){
+            WaterJugFill w=queue.poll();
+            int jug1Qty=w.jug1Qty, jug2Qty=w.jug2Qty, steps=w.steps;
+            if (jug1Qty==d || jug2Qty==d)
+                return steps;
+
+            //fill jugs 1 & 2
+            if (!vis[m][jug2Qty]){
+                vis[m][jug2Qty]=true;
+                queue.add(new WaterJugFill(m,jug2Qty,steps+1));
+            }
+            if (!vis[jug1Qty][n]){
+                vis[jug1Qty][n]=true;
+                queue.add(new WaterJugFill(jug1Qty,n,steps+1));
+            }
+
+            //empty jugs
+            if (!vis[0][jug2Qty]){
+                vis[0][jug2Qty]=true;
+                queue.add(new WaterJugFill(0,jug2Qty,steps+1));
+            }
+            if (!vis[jug1Qty][0]){
+                vis[jug1Qty][0]=true;
+                queue.add(new WaterJugFill(jug1Qty,0,steps+1));
+            }
+
+            //swap jugs water
+            int pourToJug2=Math.min(n-jug2Qty,jug1Qty);
+            if (!vis[jug1Qty-pourToJug2][jug2Qty+pourToJug2]){
+                vis[jug1Qty-pourToJug2][jug2Qty+pourToJug2]=true;
+                queue.add(new WaterJugFill(jug1Qty-pourToJug2, jug2Qty+pourToJug2,steps+1));
+            }
+
+            int pourToJug1=Math.min(jug2Qty, m-jug1Qty);
+            if (!vis[jug1Qty+pourToJug1][jug2Qty-pourToJug1]){
+                vis[jug1Qty+pourToJug1][jug2Qty-pourToJug1]=true;
+                queue.add(new WaterJugFill(jug1Qty+pourToJug1,jug2Qty-pourToJug1,steps+1));
+            }
+        }
+        return -1;
+    }
+
+    public static int numberOfIslands(char grid[][]){
+        int m= grid.length;
+        int n= grid[0].length;
+        boolean vis[][]=new boolean[m][n];
+        int count=0;
+        Queue<Coordinates> queue=new LinkedList<>();
+        for (int i=0; i<m;i++){
+            for (int j=0;j<n;j++){
+                if (!vis[i][j] && grid[i][j]=='L'){
+                    count++;
+                    queue.add(new Coordinates(i,j));
+                    islandBfs(queue,grid,vis,m,n);
+                }
+            }
+        }
+        return count;
+    }
+
+    private static void islandBfs(Queue<Coordinates> queue,char grid[][], boolean vis[][],int m,int n){
+        int xTravel[]={1,1,1,-1,-1,-1,0,0};
+        int yTravel[]={1,-1,0,1,-1,0,1,-1};
+        while (!queue.isEmpty()){
+
+            Coordinates coordinates=queue.poll();
+            int x=coordinates.x;
+            int y= coordinates.y;
+            vis[x][y]=true;
+            for (int i=0;i<8;i++){
+                int newX= x+xTravel[i];
+                int newY= y+yTravel[i];
+                if (isSafe(newX,newY,m,n) && grid[newX][newY]=='L' && !vis[newX][newY]){
+                    queue.add(new Coordinates(newX,newY));
+                }
+            }
+        }
+    }
+
+    private static boolean isSafe(int x,int y, int m, int n){
+        return x>=0 && y>=0 && x<m && y<n;
+    }
+
+    public static void rottenOranges(int mat[][], int m, int n){
+        int count=0;
+        while (markRottenOranges(mat,m,n)){
+            count++;
+        }
+        for (int i=0;i<m;i++){
+            for (int j=0;j<n;j++){
+                if (mat[i][j]==1){
+                    System.out.println("Rotten oranges passes: -1");
+                    return;
+                }
+            }
+        }
+        System.out.println("Rotten oranges passes: "+count);
+    }
+
+    public static boolean markRottenOranges(int mat[][], int m, int n){
+        int traverseX[]={0,0,1,-1};
+        int traverseY[]={1,-1,0,0};
+        int markedOranges=0;
+        Queue<Coordinates> queue=new LinkedList<>();
+        for (int i=0;i<m;i++){
+            for (int j=0;j<n;j++){
+                if (mat[i][j]==2){
+                    for (int k=0;k<4;k++){
+                        int newX=i+traverseX[k];
+                        int newY=j+traverseY[k];
+                        if (isSafe(newX,newY,m,n) && mat[newX][newY]==1){
+                            markedOranges++;
+                            queue.add(new Coordinates(newX,newY));
+                        }
+                    }
+                }
+            }
+        }
+        while (!queue.isEmpty()){
+            Coordinates coordinates= queue.poll();
+            mat[coordinates.x][coordinates.y]=2;
+        }
+        return markedOranges>0;
+    }
+
+    public static void stepsByKnight(int knightPos[], int targetPos[], int n){
+        int traverseX[]= {2,2,-2,-2,1,1,-1,-1};
+        int traverseY[]= {1,-1,-1,1,2,-2,2,-2};
+        boolean vis[][]=new boolean[n][n];
+        int steps = 0;
+        Queue<KnightSteps> queue=new LinkedList<>();
+        queue.add(new KnightSteps(new Coordinates(knightPos[0],knightPos[1]),0));
+        vis[knightPos[0]][knightPos[1]]=true;
+        while (!queue.isEmpty()){
+            KnightSteps pos= queue.poll();
+            int x =pos.coordinates.x;
+            int y =pos.coordinates.y;
+            if (targetPos[0]==x && targetPos[1]==y) {
+                steps= pos.steps;
+                break;
+            }
+            for (int i=0;i<8;i++) {
+                int newX= x+traverseX[i];
+                int newY= y+traverseY[i];
+                if (isSafe(newX,newY,n,n) && !vis[newX][newY]) {
+                    vis[newX][newY]=true;
+                    queue.add(new KnightSteps(new Coordinates(newX,newY), pos.steps+1));
+                }
+            }
+        }
+        System.out.println("Steps taken: "+steps);
+    }
+
+    public static void main(String[] args) {
+        int[][] adj=  {{1, 2}, {0, 2}, {0, 1, 3, 4}, {2}, {2}};
+        bfs(adj);
+        dfs(adj);
+
+        char grid1[][] = {{'L', 'L', 'W', 'W', 'W'},
+                            {'W', 'L', 'W', 'W', 'L'},
+                           {'L', 'W', 'W', 'L', 'L'},
+                          {'W', 'W', 'W', 'W', 'W'},
+                         {'L', 'W', 'L', 'L', 'W'}};
+
+        System.out.println("Grid 1: "+numberOfIslands(grid1));
+
+        char grid2[][] = {{'W', 'L', 'L', 'L', 'W', 'W', 'W'},
+                            {'W', 'W', 'L', 'L', 'W', 'L', 'W'}};
+        System.out.println("Grid 2: "+numberOfIslands(grid2));
+
+        int mat[][] = {{2, 1, 0, 2, 1},
+                           {1, 0, 1, 2, 1},
+                          {1, 0, 0, 2, 1}};
+        rottenOranges(mat, mat.length, mat[0].length);
+
+        int mat2[][]= {{2, 1, 0, 2, 1},
+                           {0, 0, 1, 2, 1},
+                          {1, 0, 0, 2, 1}};
+        rottenOranges(mat2, mat2.length, mat2[0].length);
+
+        int n = 6;
+        int[] knightPos = { 1, 3 };
+        int[] targetPos = { 5, 0 };
+        stepsByKnight(knightPos, targetPos, n);
+
+        n = 100;
+        knightPos = new int[]{4, 5};
+        targetPos = new int[]{1, 1};
+        stepsByKnight(knightPos, targetPos, n);
+
+        n = 8;
+        knightPos = new int[]{2, 4};
+        targetPos = new int[]{6, 4};
+        stepsByKnight(knightPos, targetPos, n);
+
+        n = 77;
+        knightPos = new int[]{0, 0};
+        targetPos = new int[]{34, 76};
+        stepsByKnight(knightPos, targetPos, n);
+
+        int num=30;
+        int[] moves = new int[num];
+        Arrays.fill(moves, -1);
+
+        // Ladders
+        moves[2] = 21;
+        moves[4] = 7;
+        moves[10] = 25;
+        moves[19] = 28;
+
+        // Snakes
+        moves[26] = 0;
+        moves[20] = 8;
+        moves[16] = 3;
+        moves[18] = 6;
+
+        System.out.println("Min number of moves:"+snakeAndLadder(moves));
+
+        System.out.println("Water Jug "+waterJugProblem(3,5,4));
+        System.out.println("Water Jug "+waterJugProblem(4,3,2));
+        System.out.println("Water Jug "+waterJugProblem(8,56,46));
+    }
+}
+
+class WaterJugFill {
+    int jug1Qty;
+    int jug2Qty;
+    int steps;
+    WaterJugFill(int jug1Qty, int jug2Qty, int steps){
+        this.jug1Qty=jug1Qty;
+        this.jug2Qty=jug2Qty;
+        this.steps=steps;
+    }
+}
+class Coordinates{
+    int x;
+    int y;
+    Coordinates(int x,int y){
+        this.x=x;
+        this.y=y;
+    }
+}
+
+class KnightSteps{
+    Coordinates coordinates;
+    int steps;
+    KnightSteps(Coordinates coordinates, int steps){
+        this.coordinates=coordinates;
+        this.steps=steps;
+    }
+}
+
+class Cell{
+    int index;
+    int distance;
+    Cell(int index, int distance){
+        this.index=index;
+        this.distance=distance;
+    }
+}
