@@ -1,72 +1,48 @@
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-//implement using LinkedHashMap
 public class LRUCache {
- 
-    // store keys of cache
-    private Deque<Integer> doublyQueue;
- 
-    // store references of key in cache
-    private HashSet<Integer> hashSet;
- 
-    // maximum capacity of cache
-    private final int CACHE_SIZE;
- 
-    LRUCache(int capacity)
-    {
-        doublyQueue = new LinkedList<>();
-        hashSet = new HashSet<>();
-        CACHE_SIZE = capacity;
+
+    LinkedHashMap<Integer,Integer> map;
+    int capacity;
+    LRUCache(int capacity){
+        this.capacity=capacity;
+        map= new LinkedHashMap<>(capacity);
     }
- 
-    /* Refer the page within the LRU cache */
-    public void refer(int page)
-    {
-        if (!hashSet.contains(page)) {
-            if (doublyQueue.size() == CACHE_SIZE) {
-                int last = doublyQueue.removeLast();
-                hashSet.remove(last);
+
+    public void get(int key){
+        if (map.containsKey(key)){
+            int value= map.remove(key);
+            map.put(key,value);
+            System.out.println(value);;
+        }else System.out.println(-1);;
+    }
+
+    public void put(int key, int value){
+        if (!map.containsKey(key)){
+            if (map.size()<capacity){
+                map.put(key,value);
+            }else {
+                Map.Entry<Integer,Integer> firstEntry =map.firstEntry();
+                map.remove(firstEntry.getKey());
+                map.put(key,value);
             }
-        }
-        else {
-            doublyQueue.remove(page);
-        }
-        doublyQueue.push(page);
-        hashSet.add(page);
-    }
- 
-    // display contents of cache
-    public void display()
-    {
-        Iterator<Integer> itr = doublyQueue.iterator();
-        while (itr.hasNext()) {
-            System.out.print(itr.next() + " ");
+        }else {
+            map.remove(key);
+            map.put(key,value);
         }
     }
- 
-      // Driver code
-    public static void main(String[] args)
-    {
-        LRUCache cache = new LRUCache(3);
-        cache.refer(1);
-        cache.refer(2);
-        cache.refer(3);
-        cache.refer(4);
-        cache.refer(5);
 
-        cache.refer(1);
-        cache.refer(2);
-        cache.refer(5);
-
-        cache.refer(1);
-        cache.refer(2);
-        cache.refer(3);
-        cache.refer(4);
-        cache.refer(5);
-
-        cache.display();
+    public static void main(String[] args) {
+        LRUCache lruCache=new LRUCache(2);
+        lruCache.put(1,1);
+        lruCache.put(2,2);
+        lruCache.get(1);
+        lruCache.put(3,3);
+        lruCache.get(2);
+        lruCache.put(4,4);
+        lruCache.get(3);
+        lruCache.get(4);
+        lruCache.put(5,5);
     }
 }
